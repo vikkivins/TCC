@@ -9,27 +9,34 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     name = db.Column(db.String(150), nullable=False)
     username = db.Column(db.String(30), nullable=False)
-    profile_picture = db.Column(db.String(300), nullable=True)  # Caminho da foto de perfil
+    profile_picture = db.Column(db.String(300), nullable=True)  # Path to profile picture
     description = db.Column(db.String(300), nullable=True)
-    
+    books = db.relationship('Book', backref='user', lazy=True)
+    ideas = db.relationship('Idea', backref='user', lazy=True)
+
+    def get_id(self):
+            # Override the get_id method to use user_id instead of id
+            return str(self.user_id)
+
 class Book(db.Model):
     book_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    bookcover_image = db.Column(db.String(300), nullable=True)  # Caminho da foto de capa
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    bookcover_image = db.Column(db.String(300), nullable=True)  # Path to cover image
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     chapters = db.relationship('Chapter', backref='book', lazy=True)
 
 class Chapter(db.Model):
     chapter_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    capcover_image = db.Column(db.String(300), nullable=True)  # Caminho da imagem personalizada do capítulo
-    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
+    capcover_image = db.Column(db.String(300), nullable=True)  # Path to chapter image
+    book_id = db.Column(db.Integer, db.ForeignKey('book.book_id'), nullable=False)
 
 class Idea(db.Model):
     idea_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    ideacover_image = db.Column(db.String(300), nullable=True)  # Caminho da imagem associada à ideia
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    ideacover_image = db.Column(db.String(300), nullable=True)  # Path to idea image
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
+

@@ -1,7 +1,7 @@
 # services.py
 
 import oci
-from app import object_storage_client, config
+from storage import object_storage_client, config
 from datetime import datetime
 
 def generate_par_url(filename, object_storage_client, namespace, bucket_name):

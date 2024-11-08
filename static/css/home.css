@@ -1,0 +1,278 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+/* Header styles */
+header {
+    background-color: #4a0e4e;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menu-icon {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.search-bar {
+    flex-grow: 1;
+    margin: 0 20px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 20px;
+}
+
+.user-icon {
+    width: 30px;
+    height: 30px;
+    background-color: #fff;
+    border-radius: 50%;
+}
+
+/* Main content styles */
+.container {
+    padding: 20px;
+}
+
+h2 {
+    margin-bottom: 15px;
+    color: #4a0e4e;
+}
+
+/* Book carousel styles */
+.book-carousel {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 10px;
+}
+
+.book-item {
+    width: 100px;
+    height: 150px;
+    background-color: #8e44ad;
+    flex-shrink: 0;
+}
+
+/* Ideas section styles */
+.ideas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.idea-item {
+    background-color: #9b59b6;
+    padding: 15px;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.idea-item:hover {
+    background-color: #8e44ad;
+}
+
+.idea-item h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+}
+
+.idea-item p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Library section styles */
+.library-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+}
+
+.library-item {
+    width: 100%;
+    padding-top: 150%; /* 2:3 aspect ratio */
+    background-color: #8e44ad;
+    position: relative;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .book-carousel {
+        overflow-x: scroll;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Estilos para o botão de adicionar e os botões de opção */
+.add-button-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+}
+
+.add-button {
+    width: 60px;
+    height: 60px;
+    background-color: #f39c12;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.add-button.active {
+    transform: rotate(45deg);
+}
+
+.option-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.option-buttons.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.option-button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    font-size: 24px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.option-button:nth-child(1) {
+    background-color: #3498db; /* Azul para "nova obra" */
+}
+
+.option-button:nth-child(2) {
+    background-color: #e74c3c; /* Vermelho para "nova ideia" */
+}
+
+/* Ícones para os botões de opção */
+.option-button i {
+    font-size: 20px;
+}
+
+/* ... (manter os estilos anteriores) ... */
+
+/* Estilos atualizados para o carrossel de livros */
+.book-carousel-container {
+    position: relative;
+    overflow: hidden;
+    padding: 20px 0;
+}
+
+.book-carousel {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    padding: 0 40px; /* Espaço para os botões */
+}
+
+.book-carousel::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+}
+
+.book-item {
+    flex: 0 0 auto;
+    width: 150px;
+    height: 200px;
+    background-color: #8e44ad;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+    border-radius: 5px;
+    transition: transform 0.3s ease;
+}
+
+.book-item:nth-child(odd) {
+    background-color: #9b59b6;
+}
+
+.book-item:hover {
+    transform: scale(1.05);
+}
+
+.book-content {
+    text-align: center;
+    padding: 10px;
+}
+
+.book-name {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    border-radius: 50%;
+}
+
+.carousel-button.prev {
+    left: 10px;
+}
+
+.carousel-button.next {
+    right: 10px;
+}
+
+/* ... (manter os outros estilos) ... */

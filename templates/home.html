@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+<!--<div style="background-color: #fff; padding: 10px; margin: 10px 0;">
+    <h3>Debug: Livros</h3>
+    {% for book in books %}
+        <p>{{ book.name }}</p>
+    {% else %}
+        <p>Nenhum livro encontrado</p>
+    {% endfor %}
+</div>-->
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Meus livros</h2>
+    <div class="book-carousel-container">
+        <button class="carousel-button prev">&lt;</button>
+        <div class="book-carousel">
+            {% for book in books %}
+                <a href="{{ url_for('routes.view_book', book_id=book.id) }}" class="book-item">
+                    <div class="book-content">
+                        <span class="book-name">{{ book.name }}</span>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+        <button class="carousel-button next">&gt;</button>
+    </div>
+
+    <h2>Minhas ideias</h2>
+    <div class="ideas-list">
+        {% for idea in ideas %}
+            <a href="{{ url_for('routes.view_idea', idea_id=idea.id) }}" class="idea-item">
+                <h3>{{ idea.title }}</h3>
+                <p>{{ idea.content[:100] }}{% if idea.content|length > 100 %}...{% endif %}</p>
+            </a>
+        {% endfor %}
+    </div>
+
+
+    <h2>Minha Biblioteca</h2>
+    <div class="library-grid">
+        {% for book in library %}
+            <div class="library-item"></div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="add-button-container">
+    <div class="add-button" id="mainAddButton">+</div>
+    <div class="option-buttons" id="optionButtons">
+        <a href="{{ url_for('routes.create_book') }}" class="option-button">
+            <i class="fas fa-book"></i>
+        </a>
+        <a href="{{ url_for('routes.create_idea') }}" class="option-button">
+            <i class="fas fa-lightbulb"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
+{% endblock %}
