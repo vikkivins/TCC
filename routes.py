@@ -40,7 +40,7 @@ def upload_image():
 
 @routes_bp.route('/profile', methods=['GET'])
 def profile():
-    user_id = current_user.id
+    user_id = current_user.user_id
     user = User.query.get(user_id)
 
     # Verificar se a imagem do perfil já está na sessão
@@ -131,7 +131,7 @@ def create_book():
         description = request.form.get('description')
         
         # Criação do novo livro com user_id
-        new_book = Book(name=name, description=description, user_id=current_user.id)
+        new_book = Book(name=name, description=description, user_id=current_user.user_id)
         db.session.add(new_book)
         db.session.commit()
         flash('Livro criado com sucesso!', 'success')
@@ -143,7 +143,7 @@ def create_book():
 @routes_bp.route('/books')
 @login_required
 def list_books():
-    books = Book.query.filter_by(user_id=current_user.id).all()
+    books = Book.query.filter_by(user_id=current_user.user_id).all()
     return render_template('list_books.html', books=books)
 
 @routes_bp.route('/book/<int:book_id>')
@@ -158,11 +158,11 @@ def add_chapter(book_id):
     book = Book.query.get_or_404(book_id)
     title = request.form.get('title')
     content = request.form.get('content')
-    new_chapter = Chapter(title=title, content=content, book_id=book.id)
+    new_chapter = Chapter(title=title, content=content, book_id=book.book_id)
     db.session.add(new_chapter)
     db.session.commit()
     flash('Capítulo adicionado com sucesso!', 'success')
-    return redirect(url_for('routes.view_book', book_id=book.id))
+    return redirect(url_for('routes.view_book', book_id=book.book_id))
 
 # CRUD dos capítulos
 
@@ -172,14 +172,14 @@ def delete_chapter(chapter_id):
     chapter = Chapter.query.get_or_404(chapter_id)
     book = Book.query.get(chapter.book_id)
     
-    if book.user_id != current_user.id:
+    if book.user_id != current_user.user_id:
         flash('Você não tem permissão para excluir este capítulo.', 'danger')
-        return redirect(url_for('routes.view_book', book_id=book.id))
+        return redirect(url_for('routes.view_book', book_id=book.book_id))
     
     db.session.delete(chapter)
     db.session.commit()
     flash('Capítulo excluído com sucesso!', 'success')
-    return redirect(url_for('routes.view_book', book_id=book.id))
+    return redirect(url_for('routes.view_book', book_id=book.book_id))
 
 # CRUD dos livros
 
@@ -187,7 +187,7 @@ def delete_chapter(chapter_id):
 @login_required
 def edit_book(book_id):
     book = Book.query.get_or_404(book_id)
-    if book.user_id != current_user.id:
+    if book.user_id != current_user.user_id:
         flash('Você não tem permissão para editar este livro.', 'danger')
         return redirect(url_for('routes.home'))
     
@@ -196,7 +196,7 @@ def edit_book(book_id):
         book.description = request.form.get('description')
         db.session.commit()
         flash('Livro atualizado com sucesso!', 'success')
-        return redirect(url_for('routes.view_book', book_id=book.id))
+        return redirect(url_for('routes.view_book', book_id=book.book_id))
     
     return render_template('edit_book.html', book=book)
 
@@ -204,12 +204,12 @@ def edit_book(book_id):
 @login_required
 def delete_book(book_id):
     book = Book.query.get_or_404(book_id)
-    if book.user_id != current_user.id:
+    if book.user_id != current_user.user_id:
         flash('Você não tem permissão para excluir este livro.', 'danger')
         return redirect(url_for('routes.home'))
     
     # Delete all chapters associated with the book
-    Chapter.query.filter_by(book_id=book.id).delete()
+    Chapter.query.filter_by(book_id=book.book_id).delete()
     
     db.session.delete(book)
     db.session.commit()
@@ -225,7 +225,7 @@ def create_idea():
         title = request.form.get('title')
         content = request.form.get('content')
         
-        new_idea = Idea(title=title, content=content, user_id=current_user.id)
+        new_idea = Idea(title=title, content=content, user_id=current_user.user_id)
         db.session.add(new_idea)
         db.session.commit()
         flash('Ideia criada com sucesso!', 'success')
@@ -243,7 +243,7 @@ def view_idea(idea_id):
 @login_required
 def edit_idea(idea_id):
     idea = Idea.query.get_or_404(idea_id)
-    if idea.user_id != current_user.id:
+    if idea.user_id != current_user.user_id:
         flash('Você não tem permissão para editar esta ideia.', 'danger')
         return redirect(url_for('routes.home'))
     
@@ -252,7 +252,7 @@ def edit_idea(idea_id):
         idea.content = request.form.get('content')
         db.session.commit()
         flash('Ideia atualizada com sucesso!', 'success')
-        return redirect(url_for('routes.view_idea', idea_id=idea.id))
+        return redirect(url_for('routes.view_idea', idea_id=idea.idea_id))
     
     return render_template('edit_idea.html', idea=idea)
 
@@ -260,7 +260,7 @@ def edit_idea(idea_id):
 @login_required
 def delete_idea(idea_id):
     idea = Idea.query.get_or_404(idea_id)
-    if idea.user_id != current_user.id:
+    if idea.user_id != current_user.user_id:
         flash('Você não tem permissão para excluir esta ideia.', 'danger')
         return redirect(url_for('routes.home'))
     

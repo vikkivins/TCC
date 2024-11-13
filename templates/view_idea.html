@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+ {% block title %}{{ idea.title }}{% endblock %}
+
+ {% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+{% endblock %}
+
+{% block extra_title %}
+<h1 class="header-title" style="color:whitesmoke;">{{ idea.title }}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="idea-details">
+        <p>{{ idea.content }}</p>
+    </div>
+
+    <div class="idea-actions">
+        <a href="{{ url_for('routes.edit_idea', idea_id=idea.idea_id) }}" class="button">Editar Ideia</a>
+        
+        <form action="{{ url_for('routes.delete_idea', idea_id=idea.idea_id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir esta ideia?');">
+            <button type="submit" class="button delete-button">Excluir Ideia</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<a href="{{ url_for('routes.home') }}" class="button">Voltar para Home</a>
+{% endblock %}

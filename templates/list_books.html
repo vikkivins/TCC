@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seus livros</title>
+</head>
+<body>
+    <h1>Seus Livros</h1>
+
+    {% if books %}
+        <ul>
+            {% for book in books %}
+                <li><a href="{{ url_for('routes.view_book', book_id=book.book_id) }}">{{ book.name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Você não tem nenhum livro</p>
+    {% endif %}
+
+    <button><a href="{{ url_for('routes.create_book') }}">Crie um novo livro</a></button><br>
+    <button><a href="{{ url_for('routes.home') }}">Voltar ao inicio</a></button>
+    <form action="{{ url_for('routes.logout') }}" method="post" style="display:inline;">
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>

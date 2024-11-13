@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+ {% block title %}{{ book.name }}{% endblock %}
+
+ {% block extra_css %}
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #4a0e4e;
+            color: white;
+        }
+        .header-icon {
+            flex: 0 0 auto;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .header-title {
+            flex: 1;
+            text-align: center;
+            margin: 0;
+            font-size: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .chapters-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .chapter-item {
+            background-color: #9b59b6;
+            padding: 15px;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .chapter-item:hover {
+            background-color: #8e44ad;
+        }
+        .chapter-item h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+        .chapter-item p {
+            margin: 0;
+            font-size: 14px;
+        }
+        /* ... (previous styles remain unchanged) ... */
+        .chapter-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .delete-chapter-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .delete-chapter-button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+{% endblock %}
+
+
+{% block extra_title %}
+<h1 class="header-title" style="color:whitesmoke;">{{ book.name }}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Resto do conteúdo permanece o mesmo -->
+    <div class="book-details">
+        <p>{{ book.description }}</p>
+    </div>
+
+    <div class="book-actions">
+        <a href="{{ url_for('routes.edit_book', book_id=book.book_id) }}" class="button">Editar Livro</a>
+        
+        <form action="{{ url_for('routes.delete_book', book_id=book.book_id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este livro?');">
+            <button type="submit" class="button delete-button">Excluir Livro</button>
+        </form>
+    </div>
+
+    <h2>Capítulos</h2>
+<div class="chapters-list">
+    {% for chapter in book.chapters %}
+        <div class="chapter-item">
+            <h3>{{ chapter.title }}</h3>
+            <p>{{ chapter.content[:100] }}{% if chapter.content|length > 100 %}...{% endif %}</p>
+            <div class="chapter-actions">
+                <form action="{{ url_for('routes.delete_chapter', chapter_id=chapter.chapter_id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este capítulo?');">
+                    <button type="submit" class="delete-chapter-button">Excluir Capítulo</button>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+    <div class="add-chapter-section">
+        <h3>Adicionar Novo Capítulo</h3>
+        <form action="{{ url_for('routes.add_chapter', book_id=book.book_id) }}" method="POST">
+            <div class="form-group">
+                <label for="title">Título do Capítulo:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="content">Conteúdo:</label>
+                <textarea id="content" name="content" required></textarea>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="button">Adicionar Capítulo</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<a href="{{ url_for('routes.list_books') }}" class="button">Voltar à lista de livros</a>
+<a href="{{ url_for('routes.home') }}" class="button">Voltar ao início</a>
+{% endblock %}

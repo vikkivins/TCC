@@ -26,12 +26,20 @@ class Book(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     chapters = db.relationship('Chapter', backref='book', lazy=True)
 
+    def get_id(self):
+            # Override the get_id method to use user_id instead of id
+            return str(self.book_id)
+
 class Chapter(db.Model):
     chapter_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     content = db.Column(db.Text, nullable=False)
     capcover_image = db.Column(db.String(300), nullable=True)  # Path to chapter image
     book_id = db.Column(db.Integer, db.ForeignKey('book.book_id'), nullable=False)
+
+    def get_id(self):
+            # Override the get_id method to use user_id instead of id
+            return str(self.chapter_id)
 
 class Idea(db.Model):
     idea_id = db.Column(db.Integer, primary_key=True)
@@ -40,3 +48,6 @@ class Idea(db.Model):
     ideacover_image = db.Column(db.String(300), nullable=True)  # Path to idea image
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
 
+    def get_id(self):
+            # Override the get_id method to use user_id instead of id
+            return str(self.idea_id)

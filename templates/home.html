@@ -21,7 +21,7 @@
         <button class="carousel-button prev">&lt;</button>
         <div class="book-carousel">
             {% for book in books %}
-                <a href="{{ url_for('routes.view_book', book_id=book.id) }}" class="book-item">
+                <a href="{{ url_for('routes.view_book', book_id=book.book_id) }}" class="book-item">
                     <div class="book-content">
                         <span class="book-name">{{ book.name }}</span>
                     </div>
@@ -34,7 +34,7 @@
     <h2>Minhas ideias</h2>
     <div class="ideas-list">
         {% for idea in ideas %}
-            <a href="{{ url_for('routes.view_idea', idea_id=idea.id) }}" class="idea-item">
+            <a href="{{ url_for('routes.view_idea', idea_id=idea.idea_id) }}" class="idea-item">
                 <h3>{{ idea.title }}</h3>
                 <p>{{ idea.content[:100] }}{% if idea.content|length > 100 %}...{% endif %}</p>
             </a>

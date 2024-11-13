@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crie um novo livro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/edit_idea.css') }}">
+    <style>
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .button-container a {
+            text-decoration: none;
+            color: white;
+            background-color: #4a0e4e;
+            padding: 10px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .button-container a:hover {
+            background-color: #3a0a3e;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="menu-icon">☰</div>
+        <h1>Crie um novo livro</h1>
+        <div class="user-icon"></div>
+    </header>
+
+    <div class="container">
+        <form action="{{ url_for('routes.create_book') }}" method="POST">
+            <div class="form-group">
+                <label for="name">Nome do Livro</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Descrição:</label>
+                <textarea id="description" name="description"></textarea>
+            </div>
+            <div class="form-group">
+                <button type="submit">Crie um livro</button>
+            </div>
+        </form>
+    </div>
+
+    <footer>
+        <div class="button-container">
+            <a href="{{ url_for('routes.list_books') }}">Voltar à lista de livros</a>
+            <a href="{{ url_for('routes.home') }}">Voltar ao início</a>
+        </div>
+    </footer>
+</body>
+</html>
