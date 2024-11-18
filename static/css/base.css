@@ -43,4 +43,109 @@ header {
     height: 30px;
     background-color: #fff;
     border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espaço entre a imagem e o nome */
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: white; /* Ajuste conforme o tema */
+}
+
+/* Mantenha seus estilos anteriores e adicione estes: */
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px;
+    border-radius: 20px;
+    transition: background-color 0.3s;
+}
+
+.dropdown-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    min-width: 200px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 8px 0;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    transform: translateY(-10px);
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+
+.dropdown-item i {
+    width: 20px;
+    color: #666;
+}
+
+.divider {
+    height: 1px;
+    background-color: #eee;
+    margin: 8px 0;
+}
+
+.logout {
+    color: #dc3545;
+}
+
+.dropdown.active .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

@@ -1,60 +1,62 @@
 # routes.py
 
-from flask import Blueprint, request, render_template, redirect, url_for, flash, session
+from flask import Blueprint, request, render_template, redirect, url_for, flash, session, jsonify
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.utils import secure_filename
 from app import db, bcrypt
-from storage import object_storage_client, namespace, bucket_name
 from models import User, Book, Chapter, Idea
-from services import generate_par_url
+from services import handle_profile_picture_upload, delete_profile_picture
 
 routes_bp = Blueprint('routes', __name__)
 
-
 # Upload de imagens
 @routes_bp.route('/upload', methods=['POST'])
-def upload_image():
-    file = request.files['file']
-    user_id = request.form['user_id']  # Capturar o ID do usuário
-
-    if file:
-        filename = secure_filename(file.filename)
-        file_path = f"/tmp/{filename}"
-
-        # Enviar imagem para o Oracle Cloud Object Storage
-        with open(file_path, "rb") as f:
-            object_storage_client.put_object(namespace, bucket_name, filename, f)
-
-        # Gerar URL PAR para acesso temporário à imagem
-        image_url = generate_par_url(filename, object_storage_client, namespace, bucket_name)
-
-        # Atualizar o campo no banco de dados com o URL temporário
-        user = User.query.get(user_id)
-        user.profile_picture = image_url  # Atualiza a URL temporária da imagem
-        db.session.commit()
-
-        return "Imagem enviada com sucesso!"
-    
-# Verificar se a URL da imagem está na sessão
-# renderiza o perfil
+def upload_profile_picture():
+    result = handle_profile_picture_upload(request.files.get('profile_picture'), session.get('username'), user_id = current_user.user_id)
+    #return jsonify(result), (200 if result['success'] else 400)
+    return redirect(url_for('routes.profile'))
 
 @routes_bp.route('/profile', methods=['GET'])
 def profile():
+    # Obter o usuário logado
     user_id = current_user.user_id
     user = User.query.get(user_id)
 
-    # Verificar se a imagem do perfil já está na sessão
-    if 'profile_picture_url' in session:
-        profile_picture_url = session['profile_picture_url']
-    else:
-        # Se não estiver na sessão, gerar um novo URL temporário
-        filename = user.profile_picture.split('/')[-1]  # Extrair o nome do arquivo do URL salvo no banco de dados
-        profile_picture_url = generate_par_url(filename, object_storage_client, namespace, bucket_name)
-
-        # Armazenar o novo URL na sessão
+    # Caminho da imagem de perfil
+    profile_picture_url = session.get('profile_picture_url') or 'uploads/profile_pics/default_profile.png'
+    if 'profile_picture_url' not in session or user.profile_picture is None or profile_picture_url is not user.profile_picture:
+        profile_picture_url = f'uploads/profile_pics/{user.profile_picture if user.profile_picture else "default_profile.png"}'
         session['profile_picture_url'] = profile_picture_url
 
-    return render_template('profile.html', profile_picture=profile_picture_url)
+    # Capturar mensagens de erro ou sucesso do upload
+    upload_error = request.args.get('upload_error')
+    upload_success = request.args.get('upload_success')
+
+    # Obter os livros e o total de dias escrevendo
+    books = user.books  # Lista de livros associados ao usuário
+    quantidade_dias = user.writing_streak if hasattr(user, 'writing_streak') else 0  # Exemplo para "dias escrevendo"
+
+    return render_template(
+        'profile.html',
+        user=user,
+        profile_picture=profile_picture_url,
+        upload_error=upload_error,
+        upload_success=upload_success,
+        book=books,
+        quantidade=quantidade_dias
+    )
+
+@routes_bp.route('/delete_profile_picture', methods=['POST'])
+def delete_profile_picture_route():
+    user = User.query.get(current_user.user_id)
+    result = delete_profile_picture(user)
+
+    if result["success"]:
+        session['profile_picture_url'] = result["default_url"]
+        return redirect(url_for('routes.profile', upload_success=result["message"]))
+    else:
+        return redirect(url_for('routes.profile', upload_error=result["message"]))
+
 
 @routes_bp.route('/register.html', methods=['GET', 'POST'])
 def register():
@@ -94,6 +96,7 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user and bcrypt.check_password_hash(user.password, password):
             login_user(user, remember=request.form.get('remember'))
+            session['username'] = user.username  # Save the username in session
             return redirect(url_for('routes.home'))
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
@@ -103,6 +106,7 @@ def login():
 @login_required
 def logout():
     logout_user()
+    session.clear()
     return redirect(url_for('routes.login'))
 
 @routes_bp.route('/forgot.html', methods=['GET', 'POST'])

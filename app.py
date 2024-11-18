@@ -4,11 +4,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from config import Config
-from storage import object_storage_client, namespace, bucket_name   
-
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
+app.config['UPLOAD_FOLDER'] = 'static/uploads/profile_pics'
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # Limite de 2MB
 
 db = SQLAlchemy(app) # inicializa a extensão, configurando o ORM (Object-Relational Mapping) pra ele interagir com o db
 bcrypt = Bcrypt(app) # é usado pra hash e verificação de senhas  

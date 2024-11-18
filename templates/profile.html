@@ -6,98 +6,159 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
 {% endblock %}
 
-{% block extra_title %}Meu Perfil{% endblock %}
-
 {% block content %}
-
-<section class="profile-info">
-    <div class="profile-picture-container">   
-        <div class="profile-picture">
-            {% if profile_picture_data_url %}
-                <img src="{{ profile_picture }}" alt="Profile Picture" />
-            {% else %}
-                <p>No profile picture available.</p>
-            {% endif %}
-        </div>
-        <input type="file" id="profilePictureUpload" accept=".jpg, .jpeg, .png" style="display: none;">
-        <label for="profilePictureUpload" class="upload-label">Alterar foto</label>
-    </div>
-    <div id="uploadError" class="error-message" style="display: none;"></div> 
-    <h2 class="user-name">{{ user.name }}</h2>
-    <p class="user-handle">{{ user.username }} · pro/nome</p>
-    <p class="user-description">{{ user.description }}</p>
-    <button class="edit-buttons">Editar perfil</button>
-</section>
-
-<section class="latest-updates">
-    <h3>Últimas Atualizações</h3>
-    <div class="update-cards">
-        <div class="update-card">
-            <div class="card-image">{{ book.bookcover_image }}</div>
-            <div class="card-content">
-                <h4>{{ book.name }}</h4>
-                <p>{{ book.description }}</p>
-                <span class="tag">Tag pra saber o tipo de atualização</span>
-            </div>
-        </div>
-        <div class="update-card">
-            <div class="card-content">
-                <h4>Atualização na TL</h4>
-                <p>Essa foi a última atualização na TL dessa pessoa...</p>
-                <span class="tag">Tag pra saber o tipo de atualização</span>
-            </div>
-        </div>
-        <!-- Add more update cards as needed -->
-    </div>
-</section>
-
-<section class="writing-streak">
-    <h3>{{ quantidade }} dias escrevendo! 🔥</h3>
-    <div class="calendar-grid">
-        <!-- Calendar grid will be populated dynamically -->
-    </div>
-</section>
-
-<section class="my-books">
-    <h3>Minhas Obras</h3>
-    <button class="carousel-button prev">&lt;</button>
-    <div class="book-carousel">
-        {% for book in books %}
-            <a href="{{ url_for('routes.view_book', book_id=book.id) }}" class="book-item">
-                <div class="book-content">
-                    <span class="book-name">{{ book.name }}</span>
+<div class="profile-container">
+    <div class="left-sidebar">
+        <div class="profile-info">
+            <div class="profile-picture-container">   
+                <div class="profile-picture">
+                    {% if profile_picture %}
+                        <img src="{{ url_for('static', filename=profile_picture) }}" alt="Foto de Perfil" />
+                    {% endif %}
                 </div>
-            </a>
-        {% endfor %}
+                
+                <form action="{{ url_for('routes.upload_profile_picture') }}" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="profile_picture" id="profilePictureUpload" accept=".jpg, .jpeg, .png" style="display: none;" onchange="this.form.submit()">
+                    <label for="profilePictureUpload" class="upload-label">Alterar foto</label>
+                </form>
+                <form action="{{ url_for('routes.delete_profile_picture_route') }}" method="POST">
+                    <button type="submit" class="delete-button">Excluir foto</button>
+                </form>
+
+                {% if upload_error %}
+                    <div id="uploadError" class="error-message">{{ upload_error }}</div>
+                {% elif upload_success %}
+                    <div id="uploadSuccess" class="success-message">{{ upload_success }}</div>
+                {% endif %}
+            </div>
+
+            <h2 class="user-name">{{ user.name }}</h2>
+            <p class="user-handle">{{ user.username }} · pro/nome</p>
+            <p class="user-description">{{ user.description }}</p>
+            <button class="edit-button">Editar perfil</button>
+        </div>
+
+        <div class="emblems-section">
+            <h3>Emblemas</h3>
+            <ul class="emblems-list">
+                <li><span class="badge purple"></span>Escrevendo assiduamente!</li>
+                <li><span class="badge orange"></span>Editando com o coração!</li>
+                <li><span class="badge red"></span>Lendo vorazmente!</li>
+            </ul>
+            <button class="edit-button">Editar emblemas</button>
+        </div>
+
+        <div class="availability-section">
+            <h3>Disponibilidade</h3>
+            <ul class="availability-list">
+                <li class="available"><span class="status-icon"></span>Disponível para editar</li>
+                <li class="unavailable"><span class="status-icon"></span>Indisponível para editar</li>
+            </ul>
+            <button class="edit-button">Editar disponibilidade</button>
+        </div>
     </div>
-    <button class="carousel-button next">&gt;</button>
-</section>
 
-<section class="emblems">
-    <h3>Emblemas</h3>
-    <ul>
-        <li>Escrevendo assiduamente!</li>
-        <li>Editando com o coração!</li>
-        <li>Lendo vorazmente!</li>
-    </ul>
-    <button class="edit-buttons">Editar emblemas</button>
-</section>
+    <div class="main-content">
+        <section class="latest-updates">
+            <h3>Últimas Atualizações</h3>
+            <div class="update-cards">
+                <div class="update-card">
+                    <div class="book-cover">
+                        <div class="cover-placeholder">Capa da obra</div>
+                    </div>
+                    <div class="card-content">
+                        <h4>Atualização de obra título</h4>
+                        <p>Breve descrição da atualização da obra com um limite de caracteres para caber no card...</p>
+                        <span class="update-tag purple">Tag para saber o tipo de atualização</span>
+                    </div>
+                </div>
+                <div class="update-card">
+                    <div class="card-content">
+                        <h4>Atualização de postagem no perfil título</h4>
+                        <p>Breve descrição da atualização da obra com um limite de caracteres para caber no card...</p>
+                        <span class="update-tag orange">Tag para saber o tipo de atualização</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<section class="availability">
-    <h3>Disponibilidade</h3>
-    <ul>
-        <li class="available">Disponível para editar</li>
-        <li class="unavailable">Indisponível para editar</li>
-    </ul>
-    <button class="edit-buttons">Editar disponibilidade</button>
-</section>
+        <section class="writing-streak">
+            <h3>{{ quantidade }} dias escrevendo! 🔥</h3>
+            <div class="calendar-container">
+                <div class="month-grid">
+                    <div class="month">
+                        <div class="month-header">JANUARY</div>
+                        <div class="days-grid"></div>
+                    </div>
+                    <div class="month">
+                        <div class="month-header">FEBRUARY</div>
+                        <div class="days-grid"></div>
+                    </div>
+                    <div class="month">
+                        <div class="month-header">MARCH</div>
+                        <div class="days-grid"></div>
+                    </div>
+                    <div class="month">
+                        <div class="month-header">APRIL</div>
+                        <div class="days-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<section class="timeline">
-    <h3>Timeline</h3>
-    <div class="timeline-entries">
-        <!-- Timeline entries will be added here -->
+        <section class="my-books">
+            <div class="section-header">
+                <h3>Minhas Obras</h3>
+                <a href="#" class="see-all">Ver tudo</a>
+            </div>
+            <div class="books-carousel-container">
+                <button class="carousel-button prev">&lt;</button>
+                <div class="book-carousel">
+                    {% for book in books %}
+                        <div class="book-card">
+                            <div class="book-cover">
+                                {% if book.cover_image %}
+                                    <img src="{{ url_for('static', filename=book.cover_image) }}" alt="{{ book.name }}">
+                                {% else %}
+                                    <div class="cover-placeholder"></div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-button next">&gt;</button>
+            </div>
+        </section>
+
+        <section class="timeline">
+            <div class="section-header">
+                <h3>Timeline</h3>
+                <a href="#" class="see-all">Ver tudo</a>
+            </div>
+            <div class="timeline-entries">
+                <div class="timeline-entry">
+                    <div class="entry-header">
+                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Avatar" class="entry-avatar">
+                        <span class="entry-username">~ username</span>
+                    </div>
+                    <p class="entry-content">Atualização do usuário na timeline com número de caracteres restringido...</p>
+                    <span class="entry-time">há 5 minutos</span>
+                </div>
+                <div class="timeline-entry">
+                    <div class="entry-header">
+                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Avatar" class="entry-avatar">
+                        <span class="entry-username">~ username</span>
+                    </div>
+                    <p class="entry-content">Atualização do usuário na timeline com número de caracteres restringido...</p>
+                    <span class="entry-time">dia/mês/ano - hora:minutos</span>
+                </div>
+            </div>
+            <button class="manage-posts">Gerenciar minhas publicações</button>
+        </section>
     </div>
-    <button class="manage-posts">Gerenciar minhas publicações</button>
-</section>
+</div>
+{% endblock %}
 
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 {% endblock %}

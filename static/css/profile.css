@@ -1,5 +1,4 @@
 /* profile.css */
-
 :root {
     --primary-color: #8e44ad;
     --secondary-color: #9b59b6;
@@ -9,134 +8,219 @@
 }
 
 main {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 30px;
 }
 
+/* Left Sidebar */
 .profile-info {
-    text-align: center;
-    margin-bottom: 20px;
+    text-align: left;
 }
 
 .profile-picture-container {
     position: relative;
     width: 150px;
     height: 150px;
-    margin: 0 auto 10px;
+    margin-bottom: 20px;
 }
 
 .profile-picture {
     width: 100%;
     height: 100%;
-    background-color: #ddd;
     border-radius: 50%;
-    background-size: cover;
-    background-position: center;
-    cursor: pointer;
+    overflow: hidden;
+    background: #e0e0e0;
 }
 
-.upload-label {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    padding: 5px 10px;
+.profile-picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-name {
+    font-size: 1.5rem;
+    margin: 10px 0 5px;
+    color: var(--primary-color);
+}
+
+.user-handle {
+    color: #666;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.user-description {
+    color: #444;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+/* Latest Updates Section */
+.latest-updates {
+    background: white;
     border-radius: 15px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    padding: 20px;
+    margin-bottom: 30px;
 }
 
-.profile-picture-container:hover .upload-label {
-    opacity: 1;
-}
-
-.edit-buttons {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 20px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-.manage-posts{
-    background-color: rgb(167, 166, 166);
-    color: rgb(81, 81, 81);
-    border: none;
-    padding: 10px 20px;
-    border-radius: 20px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-
-.update-cards, .book-carousel {
+.update-cards {
     display: flex;
-    overflow-x: auto;
     gap: 20px;
-    padding: 10px 0;
+    margin-top: 15px;
 }
 
-.update-card, .work-thumbnail {
-    background-color: var(--card-background);
+.update-card {
+    background: #f8f8f8;
     border-radius: 10px;
-    padding: 10px;
-    min-width: 200px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 15px;
+    width: 300px;
+}
+
+.card-image {
+    width: 80px;
+    height: 80px;
+    background: var(--primary-color);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* Writing Streak Calendar */
+.writing-streak {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
 }
 
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-    margin-top: 10px;
+    gap: 3px;
+    margin-top: 15px;
 }
 
 .calendar-day {
-    width: 20px;
-    height: 20px;
-    background-color: var(--secondary-color);
-    border-radius: 3px;
+    aspect-ratio: 1;
+    background: var(--primary-color);
+    border-radius: 2px;
 }
 
-.emblems ul, .availability ul {
-    list-style-type: none;
+/* My Books Section */
+.my-books {
+    position: relative;
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.book-carousel {
+    display: flex;
+    gap: 15px;
+    overflow-x: hidden;
+    margin: 0 30px;
+}
+
+.book-item {
+    min-width: 150px;
+    height: 200px;
+    background: var(--primary-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.carousel-button.prev { left: 10px; }
+.carousel-button.next { right: 10px; }
+
+/* Emblems Section */
+.emblems {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.emblems ul {
+    list-style: none;
     padding: 0;
+    margin: 15px 0;
 }
 
-.emblems li, .availability li {
-    margin-bottom: 5px;
+.emblems li {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.available {
-    color: green;
+/* Availability Section */
+.availability {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
 }
 
-.unavailable {
-    color: gray;
+.availability ul {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+}
+
+/* Timeline Section */
+.timeline {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
 }
 
 .timeline-entries {
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .timeline-entry {
-    background-color: var(--card-background);
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 15px;
+    border-bottom: 1px solid #eee;
 }
 
-.error-message {
-    color: #d32f2f;
+/* Buttons */
+.edit-buttons {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
     font-size: 0.9rem;
-    margin-top: 10px;
-    text-align: center;
+}
+
+.manage-posts {
+    display: block;
+    width: fit-content;
+    margin: 20px auto;
+    background: #e0e0e0;
+    color: #666;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
 }
