@@ -1,0 +1,647 @@
+# services.py
+
+import os
+from werkzeug.utils import secure_filename
+from app import app, db
+from models import User
+from flask import session
+import bcrypt
+import re
+from datetime import datetime
+
+def initialize_registration_session():
+    if 'registration_data' not in session:
+        session['registration_data'] = {}
+        session['current_step'] = 1
+
+def validate_username(username):
+    if not username:
+        return False, "Username é obrigatório"
+    
+    if not re.match(r'^[a-zA-Z][a-zA-Z0-9._-]*$', username):
+        return False, "Username deve começar com uma letra e pode conter apenas letras, números, ponto, hífen e underscore"
+    
+    existing_username = User.query.filter_by(username=username).first()
+    if existing_username:
+        return False, "Este username já está em uso"
+    
+    return True, None
+
+def calculate_age(birthdate):
+    today = datetime.now()
+    age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
+    return age
+
+def validate_birthdate(birthdate_str):
+    try:
+        birthdate = datetime.strptime(birthdate_str, '%Y-%m-%d')
+        age = calculate_age(birthdate)
+        
+        if age < 14:
+            return False, "Você precisa ter pelo menos 14 anos para se cadastrar"
+        
+        if age > 120:
+            return False, "Data de nascimento inválida"
+            
+        return True, None
+    except ValueError:
+        return False, "Data de nascimento inválida"
+
+def validate_password_strength(password):
+    if len(password) < 6:
+        return False, "A senha deve ter pelo menos 6 caracteres"
+    
+    if not re.search(r'[A-Z]', password):
+        return False, "A senha deve conter pelo menos uma letra maiúscula"
+    
+    if not re.search(r'[a-z]', password):
+        return False, "A senha deve conter pelo menos uma letra minúscula"
+    
+    if not re.search(r'\d', password):
+        return False, "A senha deve conter pelo menos um número"
+    
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        return False, "A senha deve conter pelo menos um caractere especial"
+    
+    return True, None
+
+def create_user(registration_data, password):
+    try:
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        user = User(
+            email=registration_data['email'],
+            username=registration_data['username'],
+            name=registration_data['name'],
+            password=hashed_password,
+            birthdate=datetime.strptime(registration_data['birthdate'], '%Y-%m-%d'),
+            profile_picture=registration_data.get('profile_picture', 'default_profile.png')
+        )
+        db.session.add(user)
+        db.session.commit()
+        return True, None
+    except Exception as e:
+        return False, 'Erro ao criar conta. Por favor, tente novamente.'
+
+def handle_registration_step(step, form_data, files=None):
+    if step == 1:
+        username = form_data.get('username')
+        success, message = validate_username(username)
+        if not success:
+            return False, message
+        
+        if files and files.get('profile_picture'):
+            result = handle_profile_picture_upload(files['profile_picture'], username, None)
+            if not result['success']:
+                return False, result['message']
+            session['registration_data']['profile_picture'] = result['url']
+        
+        session['registration_data']['username'] = username
+        return True, None
+        
+    elif step == 2:
+        birthdate = form_data.get('birthdate')
+        success, message = validate_birthdate(birthdate)
+        if not success:
+            return False, message
+        
+        session['registration_data']['birthdate'] = birthdate
+        return True, None
+        
+    elif step == 3:
+        name = form_data.get('name')
+        email = form_data.get('email')
+        success, message = validate_user_data(name, email)
+        if not success:
+            return False, message
+        
+        session['registration_data'].update({
+            'name': name,
+            'email': email
+        })
+        return True, None
+        
+    elif step == 4:
+        password = form_data.get('password')
+        password_confirm = form_data.get('password_confirm')
+        
+        success, message = validate_password(password, password_confirm)
+        if not success:
+            return False, message
+        
+        success, message = create_user(session['registration_data'], password)
+        if success:
+            session.pop('registration_data', None)
+            session.pop('current_step', None)
+        
+        return success, message
+    
+    return False, 'Etapa inválida'
+
+
+
+
+
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def handle_profile_picture_upload(file, username, user_id):
+    if not file:
+        return {"success": False, "message": "Nenhuma imagem selecionada"}
+    
+    if file.filename == '':
+        return {"success": False, "message": "Arquivo inválido"}
+
+    if not allowed_file(file.filename):
+        return {"success": False, "message": "Apenas arquivos JPG e PNG são suportados"}
+
+    # Verifica o tamanho do arquivo
+    file.seek(0, os.SEEK_END)
+    file_length = file.tell()
+    if file_length > app.config['MAX_CONTENT_LENGTH']:
+        return {"success": False, "message": "O arquivo é muito grande. O tamanho máximo é 2MB."}
+    file.seek(0)  # Reseta o ponteiro para leitura
+
+    # Salva o arquivo
+    filename = save_profile_picture(file, username, user_id)
+    if filename:
+        profile_picture_url = f'static/uploads/profile_pics/{filename}'
+        return {"success": True, "url": profile_picture_url}
+    else:
+        return {"success": False, "message": "Erro ao salvar a imagem."}
+
+def save_profile_picture(file, username, user_id):
+    extension = file.filename.rsplit('.', 1)[1].lower()
+    filename = f"profile_picture_{username}.{extension}"
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(filename))
+    file.save(file_path)
+    user = User.query.get(user_id)
+    user.profile_picture = filename
+    if user:
+        db.session.commit() 
+    return filename
+
+def delete_profile_picture(user):
+    # Verifica se o usuário tem uma imagem de perfil personalizada
+    if user.profile_picture:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], user.profile_picture)
+        if os.path.exists(file_path):
+            os.remove(file_path)  # Remove o arquivo do sistema
+
+        # Atualiza o perfil do usuário para usar a imagem padrão
+        user.profile_picture = None
+        db.session.commit()
+
+        # Atualiza a sessão para redefinir a imagem padrão
+        return {"success": True, "message": "Foto de perfil excluída com sucesso", "default_url": 'static/images/default_profile.png'}
+    else:
+        return {"success": False, "message": "Nenhuma foto de perfil para excluir"}
+
+# routes.py 
+
+# Upload de imagens
+@routes_bp.route('/upload', methods=['POST'])
+def upload_profile_picture():
+    result = handle_profile_picture_upload(request.files.get('profile_picture'), session.get('username'), user_id = current_user.user_id)
+    #return jsonify(result), (200 if result['success'] else 400)
+    return redirect(url_for('routes.profile'))
+
+@routes_bp.route('/profile', methods=['GET'])
+def profile():
+    # Obter o usuário logado
+    user_id = current_user.user_id
+    user = User.query.get(user_id)
+
+    # Caminho da imagem de perfil
+    profile_picture_url = session.get('profile_picture_url') or 'uploads/profile_pics/default_profile.png'
+    if 'profile_picture_url' not in session or user.profile_picture is None or profile_picture_url is not user.profile_picture:
+        profile_picture_url = f'uploads/profile_pics/{user.profile_picture if user.profile_picture else "default_profile.png"}'
+        session['profile_picture_url'] = profile_picture_url
+
+    # Capturar mensagens de erro ou sucesso do upload
+    upload_error = request.args.get('upload_error')
+    upload_success = request.args.get('upload_success')
+
+    # Obter os livros e o total de dias escrevendo
+    books = user.books  # Lista de livros associados ao usuário
+    quantidade_dias = user.writing_streak if hasattr(user, 'writing_streak') else 0  # Exemplo para "dias escrevendo"
+
+    return render_template(
+        'profile.html',
+        user=user,
+        profile_picture=profile_picture_url,
+        upload_error=upload_error,
+        upload_success=upload_success,
+        book=books,
+        quantidade=quantidade_dias
+    )
+
+@routes_bp.route('/delete_profile_picture', methods=['POST'])
+def delete_profile_picture_route():
+    user = User.query.get(current_user.user_id)
+    result = delete_profile_picture(user)
+
+    if result["success"]:
+        session['profile_picture_url'] = result["default_url"]
+        return redirect(url_for('routes.profile', upload_success=result["message"]))
+    else:
+        return redirect(url_for('routes.profile', upload_error=result["message"]))
+
+
+@routes_bp.route('/register.html', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('routes.home'))
+    
+    initialize_registration_session()
+
+    if 'current_step' not in session:
+        session['current_step'] = 1
+    
+    if request.method == 'POST':
+        current_step = session.get('current_step', 1)
+        
+        success, message = handle_registration_step(
+            current_step,
+            request.form,
+            request.files
+        )
+        
+        if not success:
+            flash(message, 'danger')
+            return render_template('register.html',
+                                current_step=current_step,
+                                registration_data=session['registration_data'])
+        
+        if current_step < 4:
+            session['current_step'] = current_step + 1
+            return render_template('register.html',
+                                current_step=session['current_step'],
+                                registration_data=session['registration_data'])
+        else:
+            flash('Sua conta foi criada com sucesso! Você já pode fazer login.', 'success')
+            return redirect(url_for('routes.login'))
+    
+    return render_template('register.html',
+                         current_step=session.get('current_step', 1),
+                         registration_data=session.get('registration_data', {}))
+
+@routes_bp.route('/register/previous', methods=['POST'])
+def register_previous():
+    if 'current_step' in session and session['current_step'] > 1:
+        session['current_step'] -= 1
+    return redirect(url_for('routes.register'))
+
+@routes_bp.route('/register/next', methods=['POST'])
+def register_next():
+    if 'current_step' in session and session['current_step'] < 4:
+        session['current_step'] += 1
+    return redirect(url_for('routes.register'))
+
+register.html
+
+<!-- templates/register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Registro - Wizard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .video-background {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1;
+        }
+
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom,
+                rgba(111, 7, 121, 0.3) 0%,
+                rgba(5, 1, 34, 0.9) 100%);
+            z-index: -1;
+        }
+
+        .wizard-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 2rem auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .wizard-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2.5rem;
+            color: white;
+        }
+
+        .wizard-title {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .wizard-subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+        }
+
+        .step-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            display: block;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 0.8rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: white;
+            box-shadow: none;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .btn-wizard {
+            padding: 0.8rem 2rem;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-next {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+        }
+
+        .btn-next:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-dots {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            gap: 0.8rem;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: white;
+            transform: scale(1.2);
+        }
+
+        .preview-container {
+            width: 150px;
+            height: 150px;
+            margin: 1rem auto;
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: white;
+            cursor: pointer;
+        }
+
+        .password-requirements {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .requirement.met {
+            color: #4CAF50;
+        }
+
+        .requirement.unmet {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .alert {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Video Background -->
+    <video autoplay muted loop class="video-background">
+        <source src="../static/videos/background-video.mp4" type="video/mp4">
+    </video>
+    <!-- Gradient Overlay -->
+    <div class="video-overlay"></div>
+
+    <div class="wizard-container">
+        <div class="wizard-card">
+            <h1 class="wizard-title">Crie sua nova conta</h1>
+            {% if current_step == 1 %}
+                <h2 class="wizard-subtitle">Escolha sua imagem favorita e um nome de usuário</h2>
+            {% elif current_step == 2 %}
+                <h2 class="wizard-subtitle">Vamos checar sua faixa etária</h2>
+            {% elif current_step == 3 %}
+                <h2 class="wizard-subtitle">Agora coloca seu nome e escolha seu melhor e-mail para cadastrar :)</h2>
+            {% elif current_step == 4 %}
+                <h2 class="wizard-subtitle">Escolha uma senha forte</h2>
+            {% endif %}
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} mb-3">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% if current_step == 1 %}
+                    <div class="preview-container">
+                        {% if registration_data.get('profile_picture') %}
+                            <img src="{{ registration_data.get('profile_picture') }}" alt="Preview" class="preview-image">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/default_profile.png') }}" alt="Default" class="preview-image">
+                        {% endif %}
+                        <label for="profile_picture" class="upload-overlay">
+                            Alterar foto
+                        </label>
+                        <input type="file" id="profile_picture" name="profile_picture" class="d-none" accept=".jpg,.jpeg,.png">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="username" placeholder="Nome de usuário" 
+                               value="{{ registration_data.get('username', '') }}" required 
+                               pattern="^[a-zA-Z][a-zA-Z0-9._-]*$">
+                    </div>
+
+                {% elif current_step == 2 %}
+                    <div class="form-group">
+                        <input type="date" class="form-control" name="birthdate" 
+                               value="{{ registration_data.get('birthdate', '') }}" required>
+                    </div>
+
+                {% elif current_step == 3 %}
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="name" placeholder="Nome completo"
+                               value="{{ registration_data.get('name', '') }}" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" class="form-control" name="email" placeholder="E-mail"
+                               value="{{ registration_data.get('email', '') }}" required>
+                    </div>
+
+                {% elif current_step == 4 %}
+                    <div class="form-group">
+                        <input type="password" class="form-control" name="password" id="password" 
+                               placeholder="Escolha uma senha" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" name="password_confirm" 
+                               placeholder="Repita sua senha" required>
+                    </div>
+                    <div class="password-requirements">
+                        <div class="requirement" id="length">• Mínimo 6 caracteres</div>
+                        <div class="requirement" id="uppercase">• Uma letra maiúscula</div>
+                        <div class="requirement" id="lowercase">• Uma letra minúscula</div>
+                        <div class="requirement" id="number">• Um número</div>
+                        <div class="requirement" id="special">• Um caractere especial</div>
+                    </div>
+                {% endif %}
+
+                <div class="progress-dots">
+                    {% for i in range(1, 5) %}
+                        <div class="dot {% if i <= current_step %}active{% endif %}"></div>
+                    {% endfor %}
+                </div>
+
+                <div class="nav-buttons">
+                    {% if current_step > 1 %}
+                        <button type="button" class="btn btn-wizard btn-back" onclick="window.location.href='{{ url_for('routes.register_previous') }}'">Voltar</button>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+
+                    {% if current_step < 4 %}
+                        <button type="submit" class="btn btn-wizard btn-next">Avançar</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-wizard btn-next">Cadastrar</button>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Password validation
+        const password = document.getElementById('password');
+        if (password) {
+            password.addEventListener('input', function() {
+                const requirements = {
+                    length: this.value.length >= 6,
+                    uppercase: /[A-Z]/.test(this.value),
+                    lowercase: /[a-z]/.test(this.value),
+                    number: /[0-9]/.test(this.value),
+                    special: /[!@#$%^&*(),.?":{}|<>]/.test(this.value)
+                };
+
+                for (const [requirement, met] of Object.entries(requirements)) {
+                    const element = document.getElementById(requirement);
+                    if (element) {
+                        element.classList.toggle('met', met);
+                        element.classList.toggle('unmet', !met);
+                    }
+                }
+            });
+        }
+
+        // Image preview
+        const profilePicture = document.getElementById('profile_picture');
+        if (profilePicture) {
+            profilePicture.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.querySelector('.preview-image').src = e.target.result;
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

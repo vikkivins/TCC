@@ -10,14 +10,37 @@
 </head>
 
 <style>
-	section.h-100 {
-		background: linear-gradient(to bottom, #6F0779, #050122);
-		min-height: 100vh;
-		background-size: cover;
+	.video-background {
+		position: fixed;
+		right: 0;
+		bottom: 0;
+		min-width: 100%;
+		min-height: 100%;
+		width: auto;
+		height: auto;
+		z-index: -1;
+	}
+
+	.video-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(to bottom,
+			rgba(111, 7, 121, 0.3) 0%,
+			rgba(5, 1, 34, 0.9) 100%);
+		z-index: -1;
 	}
 </style>
-
+</head>
 <body>
+<!-- Video Background -->
+<video autoplay muted loop class="video-background">
+	<source src="../static/videos/background-video.mp4" type="video/mp4">
+</video>
+<!-- Gradient Overlay -->
+<div class="video-overlay"></div>
 	<section class="h-100">
 		<div class="container h-100">
 			<div class="row justify-content-sm-center h-100">

@@ -6,7 +6,6 @@ from werkzeug.utils import secure_filename
 from app import db, bcrypt
 from models import User, Book, Chapter, Idea
 from services import handle_profile_picture_upload, delete_profile_picture
-
 routes_bp = Blueprint('routes', __name__)
 
 # Upload de imagens
@@ -57,7 +56,6 @@ def delete_profile_picture_route():
     else:
         return redirect(url_for('routes.profile', upload_error=result["message"]))
 
-
 @routes_bp.route('/register.html', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -84,7 +82,6 @@ def register():
         return redirect(url_for('routes.login'))
     
     return render_template('register.html')
-
 
 @routes_bp.route('/login.html', methods=['GET', 'POST'])
 def login():

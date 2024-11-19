@@ -23,4 +23,26 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    // Adicione o código da sidebar
+    const menuIcon = document.querySelector('.menu-icon');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    menuIcon.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    });
+
+    overlay.addEventListener('click', function() {
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+    });
+
+    // Fechar ao pressionar ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+    });
 });

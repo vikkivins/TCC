@@ -12,7 +12,54 @@
 </head>
 <body>
     <header>
-        <div class="menu-icon">☰</div>
+        <div class="menu-icon"><i class="bi bi-list"></i></div>
+        <!-- Adicione isso logo após a abertura do body no base.html -->
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-video-container">
+                    <video autoplay muted loop class="sidebar-video">
+                        <source src="{{ url_for('static', filename='videos/background-sidebar.mp4') }}" type="video/mp4">
+                    </video>
+                    <div class="sidebar-video-overlay"></div>
+                </div>
+                <div class="sidebar-logo">
+                    <a href="{{ url_for('routes.home') }}">
+                        <img src="{{ url_for('static', filename='imagens/logo-nome-faisca.png') }}" alt="Logo">
+                    </a>
+                </div>
+                <div class="sidebar-header">
+                    <h3>Sua escrita</h3>
+                </div>
+                <div class="sidebar-section">
+                    <a href="#" class="sidebar-item">
+                        <i class="bi bi-book"></i>
+                        Minhas Obras
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="bi bi-lightbulb"></i>
+                        Minhas Ideias
+                    </a>
+                </div>
+                
+                <div class="sidebar-header">
+                    <h3>Sua rede</h3>
+                </div>
+                <div class="sidebar-section">
+                    <a href="#" class="sidebar-item">
+                        <i class="bi bi-calendar-event"></i>
+                        Timeline
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="bi bi-people"></i>
+                        Seguidores
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="bi bi-people-fill"></i>
+                        Seguindo
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-overlay" id="sidebar-overlay"></div>
         {% block extra_title %}{% endblock %}
         <div class="search-bar">
             <input type="text" placeholder="Pesquise...">

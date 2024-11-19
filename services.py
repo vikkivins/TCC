@@ -1,7 +1,13 @@
+# services.py
+
 import os
 from werkzeug.utils import secure_filename
 from app import app, db
 from models import User
+from flask import session
+import bcrypt
+import re
+from datetime import datetime
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
