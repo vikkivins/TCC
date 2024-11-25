@@ -1,117 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="author" content="Muhamad Nauval Azhar">
-	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<meta name="description" content="This is a login page template based on Bootstrap 5">
-	<title>Entrar</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
-</head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Entrar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        .video-background {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1;
+        }
 
-<style>
-	.video-background {
-		position: fixed;
-		right: 0;
-		bottom: 0;
-		min-width: 100%;
-		min-height: 100%;
-		width: auto;
-		height: auto;
-		z-index: -1;
-	}
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom,
+                rgba(111, 7, 121, 0.3) 0%,
+                rgba(5, 1, 34, 0.9) 100%);
+            z-index: -1;
+        }
 
-	.video-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(to bottom,
-			rgba(111, 7, 121, 0.3) 0%,
-			rgba(5, 1, 34, 0.9) 100%);
-		z-index: -1;
-	}
-</style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        form {
+            background: transparent;
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        h3 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #6f0779, #a167ba);
+            color: white;
+            width: 100%;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #8a589f, #6f0779);
+            box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.745);
+        }
+
+        .neon-button {
+            padding: 12px 30px; 
+            border: none; 
+            border-radius: 25px; 
+            font-size: 1rem; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            background: rgba(255, 255, 255, 0.1); 
+            color: white; 
+            text-decoration: none; 
+            display: inline-block; 
+            text-align: center;
+            width: 100%;
+        }
+
+        .neon-button:hover {
+            box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.745);
+        }
+
+		.boasvindas {
+            text-align: center;
+            margin-bottom: 20px; /* Espaçamento entre a imagem e o formulário */
+        }
+
+        .boasvindas img {
+            max-width: 100%; /* Ajusta para caber na largura da tela */
+            height: auto; /* Mantém a proporção */
+            max-height: 150px; /* Limita a altura da imagem */
+            display: inline-block;
+        }
+
+        .neon-button:hover {
+            box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.745);
+            color: white;
+        }
+
+
+    </style>
 </head>
 <body>
-<!-- Video Background -->
-<video autoplay muted loop class="video-background">
-	<source src="../static/videos/background-video.mp4" type="video/mp4">
-</video>
-<!-- Gradient Overlay -->
-<div class="video-overlay"></div>
-	<section class="h-100">
-		<div class="container h-100">
-			<div class="row justify-content-sm-center h-100">
-				<div class="col-xxl-4 col-xl-5 col-lg-5 col-md-7 col-sm-9">
-					<div class="text-center my-5">
-						<img src="../static/imagens/sparklecad.png" alt="logo" width="230">
-					</div>
-					<div class="card shadow-lg">
-						<div class="card-body p-5">
-							<h1 class="fs-4 card-title fw-bold mb-4">Entrar</h1>
-							<form method="POST" class="needs-validation" novalidate="" autocomplete="off">
-								<div class="mb-3">
-									<label class="mb-2 text-muted" for="email">E-mail</label>
-									<input id="email" type="email" class="form-control" name="email" value="" required autofocus>
-									<div class="invalid-feedback">
-										Este endereço de e-mail é inválido.
-									</div>
-								</div>
+    <!-- Video Background -->
+    <video autoplay muted id="video-background" class="video-background">
+        <source src="../static/videos/background-video.mp4" type="video/mp4">
+    </video>
 
-								<div class="mb-3">
-									<div class="mb-2 w-100">
-										<label class="text-muted" for="password">Senha</label>
-										<a href="forgot.html" class="float-end">
-											Esqueceu sua senha?
-										</a>
-									</div>
-									<input id="password" type="password" class="form-control" name="password" required>
-								    <div class="invalid-feedback">
-								    	Digite sua senha.
-							    	</div>
-								</div>
+    <!-- Gradient Overlay -->
+    <div class="video-overlay"></div>
 
-								{% with messages = get_flashed_messages(with_categories=true) %}
-									{% if messages %}
-										<div class="flashes">
-											{% for category, message in messages %}
-												<div class="alert alert-{{ category }}">
-													{{ message }}
-												</div>
-											{% endfor %}
-										</div>
-									{% endif %}
-								{% endwith %}
-
-
-								<div class="d-flex align-items-center">
-									<div class="form-check">
-										<input type="checkbox" name="remember" id="remember" class="form-check-input">
-										<label for="remember" class="form-check-label">Lembrar meus dados</label>
-									</div>
-									<button type="submit" class="btn btn-primary ms-auto">
-										Entrar
-									</button>
-								</div>
-							</form>
-						</div>
-						<div class="card-footer py-3 border-0">
-							<div class="text-center">
-								Não tem uma conta? <a href="register.html" class="text-dark">Cadastre-se</a>
-							</div>
-						</div>
-					</div>
-					<div class="text-center mt-5 text-muted">
-						 <!--por algum motivo segura a barra branca pra nao existir-->
-					</div>
-				</div>
-			</div>
+    <form id="loginForm" method="POST" action="{{ url_for('routes.login') }}">
+        <div class="boasvindas">
+		<img src="{{ url_for('static', filename='imagens/faisca-logo.png') }}" alt="Faísca Boas Vindas">
 		</div>
-	</section>
+        <p>Insira suas credenciais para continuar</p>
 
-	<script src="../static/js/login.js"></script>
+        <input type="email" name="email" id="email" placeholder="Seu e-mail" required>
+        <input type="password" name="password" id="password" placeholder="Sua senha" required>
 
+        <div>
+            {% if get_flashed_messages(category_filter=["danger"]) %}
+            <small class="text-danger">{{ get_flashed_messages(category_filter=["danger"])[0] }}</small>
+            {% endif %}
+        </div>
+
+        <button type="submit">Entrar</button>
+
+        <div style="margin-top: 20px;">
+            <a href="{{ url_for('routes.register') }}" class="neon-button">Criar uma conta</a>
+        </div>
+    </form>
+
+    <script src="../static/js/login.js"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Registro - Wizard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
         .video-background {
             position: fixed;
@@ -29,98 +30,368 @@
                 rgba(5, 1, 34, 0.9) 100%);
             z-index: -1;
         }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        form {
+            background: transparent;
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        h3 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .avatar-wrapper {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+            margin-bottom: 10%;
+            position: relative;
+        }
+
+        .avatar-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Garante que a imagem preencha o círculo de forma proporcional */
+            border-radius: 50%;
+        }
+
+        .camera-icon {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 32px;
+            height: 32px;
+            background: #6f0779;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .camera-icon:hover {
+            box-shadow: 0 0 5px 1px rgba(255, 255, 255, 1);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"] {
+            width: 100%;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button[type="submit"]:not([name="back"]) {
+            background: linear-gradient(45deg, #6f0779, #a167ba);
+            color: white;
+            flex: 1;
+        }
+
+        button[type="submit"]:not([name="back"]):hover {
+            background: linear-gradient(45deg, #8a589f, #6f0779);
+            box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.745);
+            color: white;
+            flex: 1;
+        }
+
+        button[name="back"] {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            flex: 1;
+        }
+        
+        button[name="back"]:hover {
+            box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.745);
+        }
+
+        .neon-button {
+            padding: 12px 30px; 
+            border: none; 
+            border-radius: 25px; 
+            font-size: 1rem; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            background: rgba(255, 255, 255, 0.1); 
+            color: white; 
+            text-decoration: none; 
+            flex: 1; 
+            display: inline-block; 
+            text-align: center;
+        }
+
+        .neon-button:hover {
+            box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.745);
+            color: white;
+        }
+
+        .progress-dots {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+        }
+
+        .dot.active {
+            background: linear-gradient(45deg, #8a589f, #6f0779);
+            box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.3);
+
+        }
+
+        #profile_picture {
+            display: none;
+        }
+
+        /* Ícones personalizados para cada etapa */
+        .step-icon {
+            width: 200px;
+            height: 200px;
+            margin: auto; /* Centraliza horizontalmente */
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            margin-bottom: 10%;
+        }
+
+        .step-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        #birth_date::-webkit-calendar-picker-indicator {
+            filter: invert(1.0) brightness(100%);
+            cursor: pointer; /* Garante que o cursor seja um ponteiro sobre o ícone */
+        }
+
+        .step {
+            display: none;
+            opacity: 0;
+            transform: translateX(100%); /* Sai pela direita */
+            transition: all 0.5s ease;
+        }
+
+        .step.active {
+            display: block;
+            opacity: 1;
+            transform: translateX(0); /* Centralizada */
+        }
+
+        .step.previous {
+            display: block;
+            opacity: 1;
+            transform: translateX(-100%); /* Sai pela esquerda */
+        }
+
     </style>
 </head>
 <body>
     <!-- Video Background -->
-    <video autoplay muted loop class="video-background">
+    <video autoplay muted id="video-background" class="video-background">
         <source src="../static/videos/background-video.mp4" type="video/mp4">
     </video>
+
     <!-- Gradient Overlay -->
     <div class="video-overlay"></div>
 
-    <section class="h-100">
-		<div class="container h-100">
-			<div class="row justify-content-sm-center h-100">
-				<div class="col-xxl-4 col-xl-5 col-lg-5 col-md-7 col-sm-9">
-					<div class="text-center my-5">
-						<img src="../static/imagens/sparklecad.png" alt="logo" width="230">
-					</div>
-					<div class="card shadow-lg">
-						<div class="card-body p-5">
-							<h1 class="fs-4 card-title fw-bold mb-4">Cadastro</h1>
+    <form id="wizardForm" method="POST" action="{{ url_for('routes.register') }}">
+        <!-- Campo oculto para o step atual -->
+        <input type="hidden" name="step" value="{{ step }}">
 
-							<!-- Bloco para exibir mensagens flash -->
-							{% with messages = get_flashed_messages(with_categories=true) %}
-								{% if messages %}
-									<div class="flashes">
-										{% for category, message in messages %}
-											<div class="alert alert-{{ category }}">
-												{{ message }}
-											</div>
-										{% endfor %}
-									</div>
-								{% endif %}
-							{% endwith %}
+        <!-- Step 1: Foto e Username -->
+        {% if step == 1 %}
+        <h3>Crie sua nova conta</h3>
+        <p>Escolha sua imagem favorita e um nome de usuário</p>
+        
+        <div class="avatar-wrapper">
+            <img src="{{ url_for('static', filename='uploads/profile_pics/default_profile.png') }}" alt="Default Avatar">
+            <label class="camera-icon" for="profile_picture">
+                <i class="fas fa-camera"></i>
+            </label>
+        </div>
 
-							<form method="POST" action="{{ url_for('routes.register') }}" class="needs-validation" novalidate="" autocomplete="off">
-                                <div class="mb-3">
-                                    <label class="mb-2 text-muted" for="name">Nome</label>
-                                    <input id="name" type="text" class="form-control" name="name" value="{{ name }}" required autofocus>
-                                    <div class="invalid-feedback">
-                                        Digite um nome
-                                    </div>
-                                </div>
+        <input type="text" name="username" id="username" placeholder="Nome de usuário" required>
+        <input type="file" name="profile_picture" id="profile_picture" style="display: none;">
+        
+        <div class="progress-dots">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
 
-                                <div class="mb-3">
-                                    <label class="mb-2 text-muted" for="username">Nome de Usuário</label>
-                                    <input id="username" type="text" class="form-control" name="username" value="{{ username }}" required>
-                                    <div class="invalid-feedback">
-                                        Digite um nome de usuário
-                                    </div>
-                                </div>
-                            
-                                <div class="mb-3">
-                                    <label class="mb-2 text-muted" for="email">E-mail</label>
-                                    <input id="email" type="email" class="form-control {% if email_error %}is-invalid{% endif %}" name="email" value="{{ email }}" required>
-                                    <div class="invalid-feedback">
-                                        Este e-mail é inválido
-                                    </div>
-                                </div>
-                            
-                                <div class="mb-3">
-                                    <label class="mb-2 text-muted" for="password">Senha</label>
-                                    <input id="password" type="password" class="form-control" name="password" required>
-                                    <div class="invalid-feedback">
-                                        Digite uma senha
-                                    </div>
-                                </div>
-                            
-                                <p class="form-text text-muted mb-3">
-									Ao se cadastrar, você concorda com nossos termos e condições.
-                                </p>
-                            
-                                <div class="align-items-center d-flex">
-                                    <button type="submit" class="btn btn-primary ms-auto">
-                                        Cadastrar
-                                    </button>
-                                </div>
-                            </form>
-                            
-						</div>
-						<div class="card-footer py-3 border-0">
-							<div class="text-center">
-								Já tem uma conta? <a href="login.html" class="text-dark">Entrar</a>
-							</div>
-						</div>
-					</div>
-					<div class="text-center mt-5 text-muted">
-						 <!--por algum motivo segura a barra branca pra nao existir-->
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
-	<script src="../static/js/login.js"></script>
+        <div>
+            {% if get_flashed_messages(category_filter=["danger"]) %}
+            <small class="text-danger">{{ get_flashed_messages(category_filter=["danger"])[0] }}</small>
+            {% endif %}
+        </div>
+
+        <div class="btn-group">
+            <a href="{{ url_for('routes.login') }}" class="neon-button">Voltar ao Login</a>
+
+        <button type="submit">Avançar</button>
+        </div>
+        {% endif %}
+
+    
+        <!-- Step 2: Data de Nascimento -->
+        {% if step == 2 %}
+        <h3>Crie sua nova conta</h3>
+        <p>Vamos checar sua faixa etária</p>
+        
+        <div class="step-icon">
+            <img src="../static/imagens/birthday-cake.png" alt="Birthday">
+        </div>
+
+        <input type="date" name="birth_date" id="birth_date" required>
+        
+        <div class="progress-dots">
+            <span class="dot"></span>
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+
+        <div>
+            {% if get_flashed_messages(category_filter=["danger"]) %}
+            <small class="text-danger">{{ get_flashed_messages(category_filter=["danger"])[0] }}</small>
+            {% endif %}
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" name="back" value="1" formnovalidate>Voltar</button>
+            <button type="submit">Avançar</button>
+        </div>
+        {% endif %}
+
+        <!-- Step 3: Nome e E-mail -->
+        {% if step == 3 %}
+        <h3>Crie sua nova conta</h3>
+        <p>Agora coloca seu nome e escolhe seu melhor e-mail para cadastrar :)</p>
+
+        <div class="step-icon">
+            <img src="../static/imagens/email-icon.png" alt="Email">
+        </div>
+
+        <input type="text" name="name" id="name" placeholder="Seu nome" required>
+        <input type="email" name="email" id="email" placeholder="Seu e-mail" required>
+        
+        <div class="progress-dots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot active"></span>
+            <span class="dot"></span>
+        </div>
+
+        <div>
+            {% if get_flashed_messages(category_filter=["danger"]) %}
+            <small class="text-danger">{{ get_flashed_messages(category_filter=["danger"])[0] }}</small>
+            {% endif %}
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" name="back" value="2" formnovalidate>Voltar</button>
+            <button type="submit">Avançar</button>
+        </div>
+        {% endif %}
+    
+        <!-- Step 4: Senha -->
+        {% if step == 4 %}
+        <h3>Crie sua nova conta</h3>
+        <p>Escolha uma senha forte</p>
+
+        <div class="step-icon">
+            <img src="../static/imagens/lock-icon.png" alt="Lock">
+        </div>
+
+        <input type="password" name="password" id="password" placeholder="Escolha uma senha" required>
+        <input type="password" name="confirm_password" id="confirm_password" placeholder="Repita sua senha" required>
+        
+        <div class="progress-dots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot active"></span>
+        </div>
+
+        <div>
+            {% if get_flashed_messages(category_filter=["danger"]) %}
+            <small class="text-danger">{{ get_flashed_messages(category_filter=["danger"])[0] }}</small>
+            {% endif %}
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" name="back" value="3" formnovalidate>Voltar</button>
+            <button type="submit">Cadastrar</button>
+        </div>
+        {% endif %}
+    </form>
+    
+    <script src="../static/js/register.js"></script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 
 from flask import Blueprint, request, render_template, redirect, url_for, flash, session, jsonify
 from flask_login import login_user, current_user, logout_user, login_required
-from werkzeug.utils import secure_filename
+from datetime import datetime
 from app import db, bcrypt
 from models import User, Book, Chapter, Idea
 from services import handle_profile_picture_upload, delete_profile_picture
@@ -58,30 +58,110 @@ def delete_profile_picture_route():
 
 @routes_bp.route('/register.html', methods=['GET', 'POST'])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('routes.home'))
-    
     if request.method == 'POST':
-        email = request.form.get('email')
-        name = request.form.get('name')
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        # Verifica se o email já está cadastrado
-        existing_user = User.query.filter_by(email=email).first()
-        if existing_user:
-            flash('Este e-mail já está cadastrado. Por favor, use outro e-mail.', 'danger')
-            return render_template('register.html', email=email, name=name, username=username, email_error=True)
-        
-        # Criação do novo usuário
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        user = User(email=email, username=username, name=name, password=hashed_password)
-        db.session.add(user)
-        db.session.commit()
-        flash('Sua conta foi criada com sucesso! Você já pode fazer login.', 'success')
-        return redirect(url_for('routes.login'))
-    
-    return render_template('register.html')
+        # Obtém os dados do formulário em cada etapa
+        step = int(request.form.get('step', 1))
+        # Retroceder etapas
+        if request.form.get('back'):
+            step = max(1, step - 1)
+            return render_template('register.html', step=step)
+
+        if step == 1:
+            username = request.form.get('username')
+            profile_picture = request.files.get('profile_picture')
+
+            # Validação do username
+            if not username or not username.isalnum():
+                flash('Nome de usuário inválido. Use apenas letras, números e _-.', 'danger')
+                return render_template('register.html', step=1)
+
+            existing_user = User.query.filter_by(username=username).first()
+            if existing_user:
+                flash('Este nome de usuário já está em uso.', 'danger')
+                return render_template('register.html', step=1)
+
+            # Salvar username na sessão
+            session['username'] = username
+
+            # Chamar lógica de upload existente
+            if profile_picture:
+                upload_result = handle_profile_picture_upload(profile_picture, username)
+                if upload_result['success']:
+                    session['profile_picture'] = upload_result['path']
+                else:
+                    flash(upload_result['message'], 'danger')
+                    return render_template('register.html', step=1)
+
+            return render_template('register.html', step=2)
+
+
+        elif step == 2:
+            birth_date = request.form.get('birth_date')
+            if not birth_date:
+                flash('Por favor, insira sua data de nascimento.', 'danger')
+                return render_template('register.html', step=2)
+
+            # Validação de idade
+            birth_date_obj = datetime.strptime(birth_date, '%Y-%m-%d')
+            age = (datetime.now() - birth_date_obj).days // 365
+            if age < 14:
+                flash('Você deve ter pelo menos 14 anos.', 'danger')
+                return render_template('register.html', step=2)
+
+            session['birth_date'] = birth_date
+            return render_template('register.html', step=3)
+
+        elif step == 3:
+            name = request.form.get('name')
+            email = request.form.get('email')
+
+            if not name or not email:
+                flash('Nome e e-mail são obrigatórios.', 'danger')
+                return render_template('register.html', step=3)
+
+            # Validação do e-mail
+            existing_email = User.query.filter_by(email=email).first()
+            if existing_email:
+                flash('Este e-mail já está em uso.', 'danger')
+                return render_template('register.html', step=3)
+
+            session['name'] = name
+            session['email'] = email
+            return render_template('register.html', step=4)
+
+        elif step == 4:
+            password = request.form.get('password')
+            confirm_password = request.form.get('confirm_password')
+
+            # Validação da senha
+            if password != confirm_password:
+                flash('As senhas não coincidem.', 'danger')
+                return render_template('register.html', step=4)
+
+            if len(password) < 6 or not any(char.isdigit() for char in password) or not any(char.isupper() for char in password):
+                flash('A senha deve ter no mínimo 6 caracteres, incluindo números e letras maiúsculas.', 'danger')
+                return render_template('register.html', step=4)
+
+            # Criar o usuário
+            # Gerar o hash da senha com Flask-Bcrypt
+            hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+            user = User(
+                username=session.get('username'),
+                profile_picture=session.get('profile_picture'),  # Reutiliza o caminho da sessão
+                name=session.get('name'),
+                email=session.get('email'),
+                password=hashed_password,
+            )
+            db.session.add(user)
+            db.session.commit()
+
+            session.clear()
+            flash('Cadastro concluído com sucesso!', 'success')
+            return redirect(url_for('routes.login'))
+
+
+    # Exibe o primeiro passo por padrão
+    return render_template('register.html', step=1)
 
 @routes_bp.route('/login.html', methods=['GET', 'POST'])
 def login():
