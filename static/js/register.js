@@ -101,3 +101,5 @@ function calculateAge(birthDate) {
 
 // Mostra o primeiro passo ao carregar
 document.addEventListener("DOMContentLoaded", () => showStep(currentStep));
+
+
